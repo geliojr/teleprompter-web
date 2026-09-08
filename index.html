@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Teleprompter</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main id="app">
+    <section id="editor" class="view">
+      <h1>Teleprompter</h1>
+      <textarea id="script-input" placeholder="Cole ou digite seu roteiro aqui..."></textarea>
+      <div class="editor-actions">
+        <button id="start-btn" class="primary" type="button">Iniciar ▶</button>
+        <button id="import-btn" type="button">📂 Importar .json</button>
+        <button id="save-btn" type="button">💾 Salvar .json</button>
+      </div>
+      <p id="message" class="message" role="alert" aria-live="polite"></p>
+      <input type="file" id="file-input" accept="application/json,.json" hidden>
+    </section>
+
+    <section id="prompter" class="view hidden">
+      <div id="viewport">
+        <div id="scroller">
+          <div id="script-text"></div>
+        </div>
+      </div>
+      <div id="controls">
+        <button id="play-btn" type="button" title="Play/Pausa (espaço)">▶</button>
+        <button id="restart-btn" type="button" title="Reiniciar do topo">⟳</button>
+        <label>Velocidade
+          <input type="range" id="speed-range" min="0" max="400" step="5">
+        </label>
+        <button id="font-dec" type="button" title="Diminuir fonte">A-</button>
+        <button id="font-inc" type="button" title="Aumentar fonte">A+</button>
+        <button id="mirror-h" type="button" title="Espelhar esquerda↔direita">↔</button>
+        <button id="mirror-v" type="button" title="Espelhar cima↕baixo">↕</button>
+        <button id="fullscreen-btn" type="button" title="Tela cheia">⛶</button>
+        <span class="spacer"></span>
+        <button id="edit-btn" type="button" title="Voltar a editar">✏️ Editar</button>
+      </div>
+    </section>
+  </main>
+
+  <script src="teleprompter-core.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
