@@ -19,6 +19,8 @@
     scriptText: document.getElementById('script-text'),
     playBtn: document.getElementById('play-btn'),
     restartBtn: document.getElementById('restart-btn'),
+    rewindBtn: document.getElementById('rewind-btn'),
+    forwardBtn: document.getElementById('forward-btn'),
     speedDec: document.getElementById('speed-dec'),
     speedInc: document.getElementById('speed-inc'),
     speedValue: document.getElementById('speed-value'),
@@ -113,6 +115,14 @@
 
   function resetScroll() {
     offset = 0;
+    applyOffset();
+  }
+
+  // Empurra o texto para trás (dir -1) ou para frente (dir +1) por ~30% da tela.
+  // Serve para achar o ponto sem depender de gesto (que no mobile recarrega a página).
+  function nudge(dir) {
+    var step = el.viewport.clientHeight * 0.3;
+    offset = core.clamp(offset + dir * step, 0, maxScroll);
     applyOffset();
   }
 
@@ -272,6 +282,8 @@
     el.editBtn.addEventListener('click', showEditor);
     el.playBtn.addEventListener('click', togglePlay);
     el.restartBtn.addEventListener('click', resetScroll);
+    el.rewindBtn.addEventListener('click', function () { nudge(-1); });
+    el.forwardBtn.addEventListener('click', function () { nudge(1); });
     el.speedDec.addEventListener('click', function () { changeSpeed(-SPEED_STEP); });
     el.speedInc.addEventListener('click', function () { changeSpeed(SPEED_STEP); });
     el.fontDec.addEventListener('click', function () { changeFont(-FONT_STEP); });

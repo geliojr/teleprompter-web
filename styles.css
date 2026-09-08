@@ -7,7 +7,9 @@
   --border: #2a2a30;
 }
 * { box-sizing: border-box; }
-html, body { height: 100%; margin: 0; }
+/* overscroll-behavior: none impede o "puxar para atualizar" (pull-to-refresh) do
+   mobile, que recarregava a página ao tentar arrastar o texto. */
+html, body { height: 100%; margin: 0; overscroll-behavior: none; }
 body {
   background: var(--bg);
   color: var(--fg);
@@ -60,7 +62,9 @@ button.active { background: var(--accent); border-color: var(--accent); color: #
 
 /* Prompter */
 #prompter { position: relative; display: flex; flex-direction: row; background: #000; }
-#viewport { flex: 1; overflow: hidden; position: relative; }
+/* touch-action: none evita que arrastar sobre o texto role/atualize a página no
+   mobile; o toque para pausar continua funcionando. */
+#viewport { flex: 1; overflow: hidden; position: relative; touch-action: none; }
 #scroller {
   position: absolute;
   top: 0; left: 0; right: 0;
