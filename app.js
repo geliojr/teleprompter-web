@@ -40,6 +40,7 @@
   var rafId = null;
   var lastTs = 0;
   var immersive = false;
+  var maxScroll = 0; // altura rolável do texto; recalculada só quando muda (não a cada frame)
 
   // ---- Persistência ----
   function save() {
@@ -90,6 +91,7 @@
     applyMirror();
     el.editor.classList.add('hidden');
     el.prompter.classList.remove('hidden');
+    recomputeMaxScroll();
     resetScroll();
     play();
   }
@@ -111,8 +113,8 @@
     applyOffset();
   }
 
-  function maxOffset() {
-    return el.scriptText.offsetHeight;
+  function recomputeMaxScroll() {
+    maxScroll = el.scriptText.offsetHeight;
   }
 
   function frame(ts) {
@@ -121,8 +123,8 @@
     var delta = ts - lastTs;
     lastTs = ts;
     offset = core.nextOffset(offset, settings.speed, delta);
-    if (offset >= maxOffset()) {
-      offset = maxOffset();
+    if (offset >= maxScroll) {
+      offset = maxScroll;
       applyOffset();
       pause();
       return;
@@ -133,6 +135,7 @@
 
   function play() {
     if (playing) return;
+    if (offset >= maxScroll) resetScroll(); // já no fim: recomeça do topo em vez de virar botão morto
     playing = true;
     lastTs = 0;
     el.playBtn.textContent = '⏸';
@@ -159,6 +162,7 @@
   function changeFont(delta) {
     settings.fontSize = core.clamp(settings.fontSize + delta, core.LIMITS.fontSize.min, core.LIMITS.fontSize.max);
     applyFontSize();
+    recomputeMaxScroll();
     save();
   }
 
@@ -271,6 +275,10 @@
     el.viewport.addEventListener('click', function () { if (immersive) togglePlay(); });
     document.addEventListener('fullscreenchange', onFullscreenChange);
     document.addEventListener('webkitfullscreenchange', onFullscreenChange);
+    // Ao girar/redimensionar, o texto re-quebra e muda de altura: recalcula.
+    window.addEventListener('resize', function () {
+      if (!el.prompter.classList.contains('hidden')) recomputeMaxScroll();
+    });
     el.saveBtn.addEventListener('click', download);
     el.importBtn.addEventListener('click', function () { el.fileInput.click(); });
     el.fileInput.addEventListener('change', function (e) {

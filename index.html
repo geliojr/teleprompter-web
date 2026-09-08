@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Teleprompter</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🎬%3C/text%3E%3C/svg%3E">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -27,16 +28,16 @@
         </div>
       </div>
       <div id="controls">
-        <button id="play-btn" type="button" title="Play/Pausa (espaço)">▶</button>
-        <button id="restart-btn" type="button" title="Reiniciar do topo">⟳</button>
+        <button id="play-btn" type="button" title="Play/Pausa (espaço)" aria-label="Play/Pausa">▶</button>
+        <button id="restart-btn" type="button" title="Reiniciar do topo" aria-label="Reiniciar do topo">⟳</button>
         <label>Velocidade
           <input type="range" id="speed-range" min="0" max="400" step="5">
         </label>
-        <button id="font-dec" type="button" title="Diminuir fonte">A-</button>
-        <button id="font-inc" type="button" title="Aumentar fonte">A+</button>
-        <button id="mirror-h" type="button" title="Espelhar esquerda↔direita">↔</button>
-        <button id="mirror-v" type="button" title="Espelhar cima↕baixo">↕</button>
-        <button id="fullscreen-btn" type="button" title="Tela cheia">⛶</button>
+        <button id="font-dec" type="button" title="Diminuir fonte" aria-label="Diminuir fonte">A-</button>
+        <button id="font-inc" type="button" title="Aumentar fonte" aria-label="Aumentar fonte">A+</button>
+        <button id="mirror-h" type="button" title="Espelhar esquerda↔direita" aria-label="Espelhar horizontal">↔</button>
+        <button id="mirror-v" type="button" title="Espelhar cima↕baixo" aria-label="Espelhar vertical">↕</button>
+        <button id="fullscreen-btn" type="button" title="Tela cheia" aria-label="Tela cheia">⛶</button>
         <span class="spacer"></span>
         <button id="edit-btn" type="button" title="Voltar a editar">✏️ Editar</button>
       </div>
