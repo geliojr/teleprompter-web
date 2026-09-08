@@ -96,7 +96,7 @@
   }
 
   // ---- Troca de view ----
-  function showPrompter() {
+  function showPrompter(autoplay) {
     el.scriptText.textContent = el.scriptInput.value;
     applyFontSize();
     applyMirror();
@@ -104,7 +104,7 @@
     el.prompter.classList.remove('hidden');
     recomputeMaxScroll();
     resetScroll();
-    play();
+    if (autoplay !== false) play(); // o clique em "Iniciar" passa o evento (autoplay); a carga por URL passa false
   }
 
   function showEditor() {
@@ -330,6 +330,24 @@
     return null;
   }
 
+  // Busca o texto de um doc pelo ID via proxy. Retorna uma Promise que resolve com
+  // o texto (e já preenche o editor) ou rejeita com uma mensagem amigável.
+  function fetchDoc(id) {
+    return fetch(GDOCS_PROXY + '?id=' + encodeURIComponent(id)).then(function (r) {
+      if (r.ok) {
+        return r.text().then(function (text) {
+          el.scriptInput.value = text;
+          save();
+          return text;
+        });
+      }
+      return r.json().then(
+        function (data) { throw new Error((data && data.error) || 'Não foi possível importar o documento.'); },
+        function () { throw new Error('Não foi possível importar o documento.'); }
+      );
+    });
+  }
+
   function importFromGoogleDocs() {
     var id = extractDocId(el.gdocsUrl.value.trim());
     if (!id) {
@@ -338,24 +356,47 @@
     }
     showMessage('Puxando do Google Docs...');
     el.gdocsBtn.disabled = true;
-    fetch(GDOCS_PROXY + '?id=' + encodeURIComponent(id))
-      .then(function (r) {
-        if (r.ok) {
-          return r.text().then(function (text) {
-            el.scriptInput.value = text;
-            save();
-            showMessage('Texto importado do Google Docs.');
-          });
-        }
-        return r.json().then(
-          function (data) { showMessage((data && data.error) || 'Não foi possível importar o documento.'); },
-          function () { showMessage('Não foi possível importar o documento.'); }
-        );
-      })
-      .catch(function () {
-        showMessage('Falha de rede ao acessar o Google Docs. Verifique o link e tente de novo.');
-      })
+    fetchDoc(id)
+      .then(function () { showMessage('Texto importado do Google Docs.'); })
+      .catch(function (e) { showMessage(e.message || 'Falha ao acessar o Google Docs.'); })
       .then(function () { el.gdocsBtn.disabled = false; });
+  }
+
+  // ---- Link do Google Docs pela URL do teleprompter (?doc=...) ----
+  // Aceita ?doc=<link>, ?url=<link>, um link cru após ?, ou o mesmo via #hash.
+  function docIdFromLocation() {
+    var tries = [];
+    try {
+      var params = new URLSearchParams(location.search);
+      ['doc', 'url', 'gdoc'].forEach(function (k) {
+        var v = params.get(k);
+        if (v) tries.push(v);
+      });
+    } catch (e) {}
+    tries.push(location.search.replace(/^\?/, ''));
+    tries.push(location.hash.replace(/^#/, ''));
+    tries.push(location.search + location.hash);
+    var all = tries.slice();
+    tries.forEach(function (t) { try { all.push(decodeURIComponent(t)); } catch (e) {} });
+    for (var i = 0; i < all.length; i++) {
+      var id = extractDocId(all[i]);
+      if (id) return id;
+    }
+    return null;
+  }
+
+  function loadDocFromUrlIfPresent() {
+    var id = docIdFromLocation();
+    if (!id) return;
+    showMessage('Carregando roteiro do Google Docs...');
+    fetchDoc(id)
+      .then(function () {
+        showMessage('');
+        showPrompter(false); // vai direto ao prompter, pausado no topo, pronto para tocar
+      })
+      .catch(function (e) {
+        showMessage(e.message || 'Não consegui carregar o Google Docs do link. Verifique o compartilhamento.');
+      });
   }
 
   // ---- Ligações ----
@@ -411,6 +452,7 @@
     applyFontSize();
     applyMirror();
     updateMirrorButtons();
+    loadDocFromUrlIfPresent();
   }
 
   init();

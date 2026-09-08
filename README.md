@@ -34,6 +34,25 @@ vercel --prod
 
 A URL do proxy usada pelo app fica em `app.js` (`GDOCS_PROXY`).
 
+### Abrir por link direto (parâmetro na URL)
+
+Dá para abrir o teleprompter já com um roteiro do Google Docs, passando o link no
+parâmetro `?doc=` — útil para mandar para outro aparelho:
+
+```
+https://geliojr.github.io/teleprompter-web/?doc=<link-do-google-docs>
+```
+
+Exemplo:
+
+```
+https://geliojr.github.io/teleprompter-web/?doc=https://docs.google.com/document/d/SEU_ID/edit
+```
+
+O app puxa o texto e vai direto para o prompter (pausado no topo, pronto para tocar).
+Também aceita o link cru após `?` e o mesmo via `#`. O documento precisa estar
+compartilhado como "qualquer pessoa com o link".
+
 ## Uso local
 
 Abra `index.html` no navegador, ou sirva a pasta:
