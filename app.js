@@ -46,6 +46,8 @@
   var lastTs = 0;
   var immersive = false;
   var maxScroll = 0; // altura rolável do texto; recalculada só quando muda (não a cada frame)
+  var DRAG_THRESHOLD = 8; // px de movimento para diferenciar arrasto de toque
+  var drag = { active: false, moved: false, startY: 0, startOffset: 0, wasPlaying: false };
 
   // ---- Persistência ----
   function save() {
@@ -124,6 +126,45 @@
     var step = el.viewport.clientHeight * 0.3;
     offset = core.clamp(offset + dir * step, 0, maxScroll);
     applyOffset();
+  }
+
+  // ---- Arrastar para rolar (dedo/mouse na área do texto) ----
+  function onDragStart(e) {
+    drag.active = true;
+    drag.moved = false;
+    drag.startY = e.clientY;
+    drag.startOffset = offset;
+    drag.wasPlaying = playing;
+    if (el.viewport.setPointerCapture) {
+      try { el.viewport.setPointerCapture(e.pointerId); } catch (err) {}
+    }
+  }
+
+  function onDragMove(e) {
+    if (!drag.active) return;
+    var dy = e.clientY - drag.startY;
+    if (!drag.moved) {
+      if (Math.abs(dy) < DRAG_THRESHOLD) return;
+      drag.moved = true;
+      if (playing) pause(); // suspende a rolagem automática enquanto arrasta
+    }
+    // Arrastar para cima avança (offset sobe); para baixo volta.
+    offset = core.clamp(drag.startOffset - dy, 0, maxScroll);
+    applyOffset();
+  }
+
+  function onDragEnd(e) {
+    if (!drag.active) return;
+    drag.active = false;
+    if (el.viewport.releasePointerCapture && e.pointerId != null) {
+      try { el.viewport.releasePointerCapture(e.pointerId); } catch (err) {}
+    }
+    if (drag.moved && drag.wasPlaying) play(); // se estava tocando, continua do novo ponto
+  }
+
+  function onViewportClick() {
+    if (drag.moved) { drag.moved = false; return; } // foi arrasto, não toque
+    if (immersive) togglePlay();
   }
 
   function recomputeMaxScroll() {
@@ -292,8 +333,13 @@
     el.mirrorV.addEventListener('click', toggleMirrorV);
     el.fullscreenBtn.addEventListener('click', toggleFullscreen);
     el.exitImmersiveBtn.addEventListener('click', exitImmersive);
+    // Arrastar (dedo/mouse) na área do texto rola o teleprompter.
+    el.viewport.addEventListener('pointerdown', onDragStart);
+    el.viewport.addEventListener('pointermove', onDragMove);
+    el.viewport.addEventListener('pointerup', onDragEnd);
+    el.viewport.addEventListener('pointercancel', onDragEnd);
     // No modo imersivo (controles escondidos) tocar na tela pausa/retoma — vale no celular.
-    el.viewport.addEventListener('click', function () { if (immersive) togglePlay(); });
+    el.viewport.addEventListener('click', onViewportClick);
     document.addEventListener('fullscreenchange', onFullscreenChange);
     document.addEventListener('webkitfullscreenchange', onFullscreenChange);
     // Ao girar/redimensionar, o texto re-quebra e muda de altura: recalcula.

@@ -63,8 +63,9 @@ button.active { background: var(--accent); border-color: var(--accent); color: #
 /* Prompter */
 #prompter { position: relative; display: flex; flex-direction: row; background: #000; }
 /* touch-action: none evita que arrastar sobre o texto role/atualize a página no
-   mobile; o toque para pausar continua funcionando. */
-#viewport { flex: 1; overflow: hidden; position: relative; touch-action: none; }
+   mobile; o toque para pausar continua funcionando. Arrastar rola o texto. */
+#viewport { flex: 1; overflow: hidden; position: relative; touch-action: none; cursor: grab; }
+#viewport:active { cursor: grabbing; }
 #scroller {
   position: absolute;
   top: 0; left: 0; right: 0;
@@ -79,6 +80,8 @@ button.active { background: var(--accent); border-color: var(--accent); color: #
   word-wrap: break-word;
   text-align: center;
   transform-origin: center center;
+  user-select: none;
+  -webkit-user-select: none;
 }
 /* Barra de controles vertical (lateral direita) */
 #controls {
