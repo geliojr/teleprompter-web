@@ -30,16 +30,16 @@
       <div id="controls">
         <button id="play-btn" type="button" title="Play/Pausa (espaço)" aria-label="Play/Pausa">▶</button>
         <button id="restart-btn" type="button" title="Reiniciar do topo" aria-label="Reiniciar do topo">⟳</button>
-        <label>Velocidade
-          <input type="range" id="speed-range" min="0" max="400" step="5">
-        </label>
+        <button id="speed-dec" type="button" title="Diminuir velocidade" aria-label="Diminuir velocidade">−</button>
+        <span id="speed-value" class="speed-value" title="Velocidade (px/s)" aria-live="polite">60</span>
+        <button id="speed-inc" type="button" title="Aumentar velocidade" aria-label="Aumentar velocidade">+</button>
         <button id="font-dec" type="button" title="Diminuir fonte" aria-label="Diminuir fonte">A-</button>
         <button id="font-inc" type="button" title="Aumentar fonte" aria-label="Aumentar fonte">A+</button>
         <button id="mirror-h" type="button" title="Espelhar esquerda↔direita" aria-label="Espelhar horizontal">↔</button>
         <button id="mirror-v" type="button" title="Espelhar cima↕baixo" aria-label="Espelhar vertical">↕</button>
         <button id="fullscreen-btn" type="button" title="Tela cheia" aria-label="Tela cheia">⛶</button>
         <span class="spacer"></span>
-        <button id="edit-btn" type="button" title="Voltar a editar">✏️ Editar</button>
+        <button id="edit-btn" type="button" title="Voltar a editar" aria-label="Editar">✏️</button>
       </div>
       <button id="exit-immersive" type="button" title="Sair da tela cheia" aria-label="Sair da tela cheia">⤢ Sair</button>
     </section>

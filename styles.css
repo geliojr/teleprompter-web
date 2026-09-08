@@ -59,7 +59,7 @@ button.active { background: var(--accent); border-color: var(--accent); color: #
 .message { color: var(--muted); min-height: 20px; margin: 0; }
 
 /* Prompter */
-#prompter { position: relative; display: flex; flex-direction: column; background: #000; }
+#prompter { position: relative; display: flex; flex-direction: row; background: #000; }
 #viewport { flex: 1; overflow: hidden; position: relative; }
 #scroller {
   position: absolute;
@@ -76,17 +76,25 @@ button.active { background: var(--accent); border-color: var(--accent); color: #
   text-align: center;
   transform-origin: center center;
 }
+/* Barra de controles vertical (lateral direita) */
 #controls {
   display: flex;
+  flex-direction: column;
   align-items: center;
   gap: 8px;
-  flex-wrap: wrap;
-  padding: 10px 14px;
+  padding: 12px 8px;
   background: var(--panel);
-  border-top: 1px solid var(--border);
+  border-left: 1px solid var(--border);
+  overflow-y: auto;
 }
-#controls label { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 14px; }
-#controls input[type="range"] { width: 160px; }
+#controls button { width: 44px; padding: 10px 0; }
+#controls .speed-value {
+  color: var(--muted);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  min-width: 32px;
+  text-align: center;
+}
 #controls .spacer { flex: 1; }
 
 /* Tela cheia / modo imersivo */

@@ -4,6 +4,7 @@
   var core = window.TeleprompterCore;
   var STORAGE_KEY = 'teleprompter-state';
   var FONT_STEP = 4;
+  var SPEED_STEP = 10;
 
   var el = {
     editor: document.getElementById('editor'),
@@ -18,7 +19,9 @@
     scriptText: document.getElementById('script-text'),
     playBtn: document.getElementById('play-btn'),
     restartBtn: document.getElementById('restart-btn'),
-    speedRange: document.getElementById('speed-range'),
+    speedDec: document.getElementById('speed-dec'),
+    speedInc: document.getElementById('speed-inc'),
+    speedValue: document.getElementById('speed-value'),
     fontDec: document.getElementById('font-dec'),
     fontInc: document.getElementById('font-inc'),
     mirrorH: document.getElementById('mirror-h'),
@@ -65,7 +68,7 @@
     settings.fontSize = newSettings.fontSize;
     settings.mirrorH = newSettings.mirrorH;
     settings.mirrorV = newSettings.mirrorV;
-    el.speedRange.value = String(settings.speed);
+    updateSpeedDisplay();
     applyFontSize();
     applyMirror();
     updateMirrorButtons();
@@ -154,8 +157,13 @@
   }
 
   // ---- Controles ----
-  function setSpeed(value) {
-    settings.speed = core.clamp(core.toNumber(value, core.DEFAULT_SETTINGS.speed), core.LIMITS.speed.min, core.LIMITS.speed.max);
+  function updateSpeedDisplay() {
+    el.speedValue.textContent = String(settings.speed);
+  }
+
+  function changeSpeed(delta) {
+    settings.speed = core.clamp(settings.speed + delta, core.LIMITS.speed.min, core.LIMITS.speed.max);
+    updateSpeedDisplay();
     save();
   }
 
@@ -264,7 +272,8 @@
     el.editBtn.addEventListener('click', showEditor);
     el.playBtn.addEventListener('click', togglePlay);
     el.restartBtn.addEventListener('click', resetScroll);
-    el.speedRange.addEventListener('input', function (e) { setSpeed(e.target.value); });
+    el.speedDec.addEventListener('click', function () { changeSpeed(-SPEED_STEP); });
+    el.speedInc.addEventListener('click', function () { changeSpeed(SPEED_STEP); });
     el.fontDec.addEventListener('click', function () { changeFont(-FONT_STEP); });
     el.fontInc.addEventListener('click', function () { changeFont(FONT_STEP); });
     el.mirrorH.addEventListener('click', toggleMirrorH);
@@ -297,7 +306,7 @@
   function init() {
     bind();
     load();
-    el.speedRange.value = String(settings.speed);
+    updateSpeedDisplay();
     applyFontSize();
     applyMirror();
     updateMirrorButtons();
