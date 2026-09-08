@@ -9,10 +9,30 @@ no navegador — nenhum texto é enviado para servidores.
 ## Funcionalidades
 
 - Rolagem automática com velocidade ajustável (play/pausa, reiniciar).
+- Voltar/avançar o texto por botões (⏪/⏩) ou arrastando com o dedo/mouse na área do texto.
 - Espelhar horizontal (↔) e vertical (↕), independentes — para uso com vidro/beam-splitter.
-- Tamanho de fonte ajustável e modo tela cheia.
+- Tamanho de fonte ajustável e modo tela cheia (imersivo, funciona no mobile).
 - Salvar o roteiro + configurações em arquivo `.json` e importar de volta.
+- Importar de um link do **Google Docs** (documento compartilhado como "qualquer pessoa com o link").
 - Persistência automática no navegador (localStorage).
+
+## Google Docs
+
+O botão "Puxar do Google Docs" busca o texto de um documento **compartilhado por
+link**. Como o navegador não consegue ler `docs.google.com` diretamente (sem CORS),
+existe um pequeno proxy serverless em `gdocs-proxy/` (Vercel) que busca o
+`export?format=txt` e devolve com CORS. Ele só aceita IDs de documento, então nunca
+vira um proxy aberto. Documentos **privados** não são suportados por este caminho
+(exigiriam login Google/OAuth).
+
+Para (re)publicar o proxy:
+
+```
+cd gdocs-proxy
+vercel --prod
+```
+
+A URL do proxy usada pelo app fica em `app.js` (`GDOCS_PROXY`).
 
 ## Uso local
 

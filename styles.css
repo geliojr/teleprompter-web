@@ -45,6 +45,17 @@ body {
   line-height: 1.5;
 }
 .editor-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.gdocs-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.gdocs-url {
+  flex: 1;
+  min-width: 220px;
+  background: var(--panel);
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 15px;
+}
 button {
   background: var(--panel);
   color: var(--fg);

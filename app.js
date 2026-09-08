@@ -5,6 +5,8 @@
   var STORAGE_KEY = 'teleprompter-state';
   var FONT_STEP = 4;
   var SPEED_STEP = 10;
+  // URL do proxy que puxa o texto de um Google Docs (deploy em gdocs-proxy/, Vercel).
+  var GDOCS_PROXY = 'https://gdocs-proxy.vercel.app/api/gdoc';
 
   var el = {
     editor: document.getElementById('editor'),
@@ -14,6 +16,8 @@
     importBtn: document.getElementById('import-btn'),
     saveBtn: document.getElementById('save-btn'),
     fileInput: document.getElementById('file-input'),
+    gdocsUrl: document.getElementById('gdocs-url'),
+    gdocsBtn: document.getElementById('gdocs-btn'),
     message: document.getElementById('message'),
     scroller: document.getElementById('scroller'),
     scriptText: document.getElementById('script-text'),
@@ -316,6 +320,44 @@
     el.message.textContent = text;
   }
 
+  // ---- Importar do Google Docs (link) ----
+  // Aceita a URL completa do documento ou o ID cru.
+  function extractDocId(input) {
+    if (!input) return null;
+    var m = /\/document\/d\/([a-zA-Z0-9_-]{20,})/.exec(input);
+    if (m) return m[1];
+    if (/^[a-zA-Z0-9_-]{20,}$/.test(input)) return input;
+    return null;
+  }
+
+  function importFromGoogleDocs() {
+    var id = extractDocId(el.gdocsUrl.value.trim());
+    if (!id) {
+      showMessage('Link do Google Docs inválido. Cole a URL completa do documento.');
+      return;
+    }
+    showMessage('Puxando do Google Docs...');
+    el.gdocsBtn.disabled = true;
+    fetch(GDOCS_PROXY + '?id=' + encodeURIComponent(id))
+      .then(function (r) {
+        if (r.ok) {
+          return r.text().then(function (text) {
+            el.scriptInput.value = text;
+            save();
+            showMessage('Texto importado do Google Docs.');
+          });
+        }
+        return r.json().then(
+          function (data) { showMessage((data && data.error) || 'Não foi possível importar o documento.'); },
+          function () { showMessage('Não foi possível importar o documento.'); }
+        );
+      })
+      .catch(function () {
+        showMessage('Falha de rede ao acessar o Google Docs. Verifique o link e tente de novo.');
+      })
+      .then(function () { el.gdocsBtn.disabled = false; });
+  }
+
   // ---- Ligações ----
   function bind() {
     el.scriptInput.addEventListener('input', function () { showMessage(''); save(); });
@@ -348,6 +390,7 @@
     });
     el.saveBtn.addEventListener('click', download);
     el.importBtn.addEventListener('click', function () { el.fileInput.click(); });
+    el.gdocsBtn.addEventListener('click', importFromGoogleDocs);
     el.fileInput.addEventListener('change', function (e) {
       var file = e.target.files && e.target.files[0];
       if (file) importFile(file);

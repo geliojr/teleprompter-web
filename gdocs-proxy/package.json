@@ -1,0 +1,9 @@
+{
+  "name": "teleprompter-gdocs-proxy",
+  "version": "1.0.0",
+  "description": "Proxy CORS para puxar texto de Google Docs no teleprompter",
+  "private": true,
+  "engines": {
+    "node": ">=18"
+  }
+}
