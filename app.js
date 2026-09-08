@@ -24,7 +24,9 @@
     mirrorH: document.getElementById('mirror-h'),
     mirrorV: document.getElementById('mirror-v'),
     fullscreenBtn: document.getElementById('fullscreen-btn'),
-    editBtn: document.getElementById('edit-btn')
+    editBtn: document.getElementById('edit-btn'),
+    viewport: document.getElementById('viewport'),
+    exitImmersiveBtn: document.getElementById('exit-immersive')
   };
 
   var settings = {
@@ -37,6 +39,7 @@
   var playing = false;
   var rafId = null;
   var lastTs = 0;
+  var immersive = false;
 
   // ---- Persistência ----
   function save() {
@@ -92,6 +95,7 @@
   }
 
   function showEditor() {
+    exitImmersive();
     pause();
     el.prompter.classList.add('hidden');
     el.editor.classList.remove('hidden');
@@ -172,12 +176,49 @@
     save();
   }
 
+  // ---- Tela cheia / modo imersivo ----
+  // A barra de controles some e o texto ocupa a tela toda (via CSS: funciona em
+  // qualquer navegador, inclusive iOS). Por cima, tentamos o fullscreen real do
+  // SO onde houver suporte (esconde a barra do navegador). Se a API não existir
+  // ou for recusada, o modo imersivo por CSS garante a experiência mesmo assim.
+  function fsElement() {
+    return document.fullscreenElement || document.webkitFullscreenElement || null;
+  }
+
+  function requestFs(node) {
+    if (node.requestFullscreen) return node.requestFullscreen();
+    if (node.webkitRequestFullscreen) return node.webkitRequestFullscreen();
+    return null;
+  }
+
+  function exitFs() {
+    if (document.exitFullscreen) return document.exitFullscreen();
+    if (document.webkitExitFullscreen) return document.webkitExitFullscreen();
+    return null;
+  }
+
+  function enterImmersive() {
+    if (immersive) return;
+    immersive = true;
+    el.prompter.classList.add('immersive');
+    var p = requestFs(el.prompter);
+    if (p && typeof p.catch === 'function') { p.catch(function () {}); }
+  }
+
+  function exitImmersive() {
+    if (!immersive) return;
+    immersive = false;
+    el.prompter.classList.remove('immersive');
+    if (fsElement()) { try { exitFs(); } catch (e) {} }
+  }
+
   function toggleFullscreen() {
-    if (document.fullscreenElement) {
-      document.exitFullscreen();
-    } else if (el.prompter.requestFullscreen) {
-      el.prompter.requestFullscreen();
-    }
+    if (immersive) exitImmersive(); else enterImmersive();
+  }
+
+  // Sai do modo imersivo se o fullscreen do SO for encerrado por fora (ex.: Esc).
+  function onFullscreenChange() {
+    if (!fsElement() && immersive) exitImmersive();
   }
 
   // ---- Salvar / Importar ----
@@ -225,6 +266,11 @@
     el.mirrorH.addEventListener('click', toggleMirrorH);
     el.mirrorV.addEventListener('click', toggleMirrorV);
     el.fullscreenBtn.addEventListener('click', toggleFullscreen);
+    el.exitImmersiveBtn.addEventListener('click', exitImmersive);
+    // No modo imersivo (controles escondidos) tocar na tela pausa/retoma — vale no celular.
+    el.viewport.addEventListener('click', function () { if (immersive) togglePlay(); });
+    document.addEventListener('fullscreenchange', onFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', onFullscreenChange);
     el.saveBtn.addEventListener('click', download);
     el.importBtn.addEventListener('click', function () { el.fileInput.click(); });
     el.fileInput.addEventListener('change', function (e) {
@@ -235,6 +281,7 @@
     document.addEventListener('keydown', function (e) {
       if (el.prompter.classList.contains('hidden')) return;
       if (e.code === 'Space') { e.preventDefault(); togglePlay(); }
+      else if (e.code === 'Escape' && immersive) { exitImmersive(); }
     });
   }
 
