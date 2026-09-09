@@ -119,8 +119,15 @@
     el.scroller.style.transform = 'translateY(' + (-offset) + 'px)';
   }
 
+  // Sentido da rolagem: com espelho vertical (scaleY(-1)) o texto fica invertido,
+  // então a rolagem precisa ir ao contrário — começa no fim e diminui — para o
+  // roteiro ser lido do começo para o fim, e não de trás para frente.
+  function scrollDirection() { return settings.mirrorV ? -1 : 1; }
+  function scrollStartOffset() { return settings.mirrorV ? maxScroll : 0; }
+  function atScrollEnd() { return settings.mirrorV ? (offset <= 0) : (offset >= maxScroll); }
+
   function resetScroll() {
-    offset = 0;
+    offset = scrollStartOffset();
     applyOffset();
   }
 
@@ -128,7 +135,8 @@
   // Serve para achar o ponto sem depender de gesto (que no mobile recarrega a página).
   function nudge(dir) {
     var step = el.viewport.clientHeight * 0.3;
-    offset = core.clamp(offset + dir * step, 0, maxScroll);
+    // dir: +1 = avançar no roteiro, -1 = voltar. scrollDirection ajusta ao espelho vertical.
+    offset = core.clamp(offset + dir * scrollDirection() * step, 0, maxScroll);
     applyOffset();
   }
 
@@ -180,9 +188,9 @@
     if (!lastTs) lastTs = ts;
     var delta = ts - lastTs;
     lastTs = ts;
-    offset = core.nextOffset(offset, settings.speed, delta);
-    if (offset >= maxScroll) {
-      offset = maxScroll;
+    offset = core.nextOffset(offset, scrollDirection() * settings.speed, delta);
+    if (atScrollEnd()) {
+      offset = settings.mirrorV ? 0 : maxScroll;
       applyOffset();
       pause();
       return;
@@ -193,7 +201,7 @@
 
   function play() {
     if (playing) return;
-    if (offset >= maxScroll) resetScroll(); // já no fim: recomeça do topo em vez de virar botão morto
+    if (atScrollEnd()) resetScroll(); // já no fim: recomeça do início em vez de virar botão morto
     playing = true;
     lastTs = 0;
     el.playBtn.textContent = '⏸';
@@ -238,7 +246,10 @@
 
   function toggleMirrorV() {
     settings.mirrorV = !settings.mirrorV;
+    // Mantém a mesma linha no centro ao inverter (o sentido da rolagem também vira).
+    offset = maxScroll - offset;
     applyMirror();
+    applyOffset();
     updateMirrorButtons();
     save();
   }
