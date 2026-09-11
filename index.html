@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Teleprompter</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🎬%3C/text%3E%3C/svg%3E">
-  <link rel="stylesheet" href="styles.css?v=2">
+  <link rel="stylesheet" href="styles.css?v=3">
 </head>
 <body>
   <main id="app">
@@ -31,6 +31,7 @@
           <div id="script-text"></div>
         </div>
       </div>
+      <div id="seekbar" title="Arraste para navegar no texto" aria-label="Progresso do texto"><div id="seek-fill"></div></div>
       <div id="controls">
         <button id="fullscreen-btn" type="button" title="Tela cheia" aria-label="Tela cheia">⛶</button>
         <button id="play-btn" type="button" title="Play/Pausa (espaço)" aria-label="Play/Pausa">▶</button>
@@ -51,7 +52,7 @@
     </section>
   </main>
 
-  <script src="teleprompter-core.js?v=2"></script>
-  <script src="app.js?v=2"></script>
+  <script src="teleprompter-core.js?v=3"></script>
+  <script src="app.js?v=3"></script>
 </body>
 </html>

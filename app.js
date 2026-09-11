@@ -35,7 +35,9 @@
     fullscreenBtn: document.getElementById('fullscreen-btn'),
     editBtn: document.getElementById('edit-btn'),
     viewport: document.getElementById('viewport'),
-    exitImmersiveBtn: document.getElementById('exit-immersive')
+    exitImmersiveBtn: document.getElementById('exit-immersive'),
+    seekbar: document.getElementById('seekbar'),
+    seekFill: document.getElementById('seek-fill')
   };
 
   var settings = {
@@ -117,6 +119,32 @@
   // ---- Motor de rolagem ----
   function applyOffset() {
     el.scroller.style.transform = 'translateY(' + (-offset) + 'px)';
+    updateSeek();
+  }
+
+  // ---- Barra de progresso / navegação (seek) ----
+  // "Progresso de leitura" (0..1). Com espelho vertical o offset é invertido,
+  // então o progresso é medido a partir do fim.
+  function readingProgress() {
+    if (maxScroll <= 0) return 0;
+    var p = settings.mirrorV ? (maxScroll - offset) : offset;
+    if (p < 0) p = 0;
+    if (p > maxScroll) p = maxScroll;
+    return p / maxScroll;
+  }
+
+  function updateSeek() {
+    el.seekFill.style.height = (readingProgress() * 100) + '%';
+  }
+
+  function seekToClientY(clientY) {
+    if (maxScroll <= 0) return;
+    var rect = el.seekbar.getBoundingClientRect();
+    var frac = rect.height ? (clientY - rect.top) / rect.height : 0;
+    frac = Math.max(0, Math.min(1, frac));
+    var p = frac * maxScroll;
+    offset = settings.mirrorV ? (maxScroll - p) : p;
+    applyOffset();
   }
 
   // Sentido da rolagem: com espelho vertical (scaleY(-1)) o texto fica invertido,
@@ -179,8 +207,29 @@
     if (immersive) togglePlay();
   }
 
+  // ---- Arrastar/tocar a barra de seek para pular pelo texto ----
+  var seeking = { active: false, wasPlaying: false };
+  function onSeekStart(e) {
+    seeking.active = true;
+    seeking.wasPlaying = playing;
+    if (playing) pause();
+    if (el.seekbar.setPointerCapture) { try { el.seekbar.setPointerCapture(e.pointerId); } catch (err) {} }
+    seekToClientY(e.clientY);
+  }
+  function onSeekMove(e) {
+    if (!seeking.active) return;
+    seekToClientY(e.clientY);
+  }
+  function onSeekEnd(e) {
+    if (!seeking.active) return;
+    seeking.active = false;
+    if (el.seekbar.releasePointerCapture && e.pointerId != null) { try { el.seekbar.releasePointerCapture(e.pointerId); } catch (err) {} }
+    if (seeking.wasPlaying) play();
+  }
+
   function recomputeMaxScroll() {
     maxScroll = el.scriptText.offsetHeight;
+    updateSeek();
   }
 
   function frame(ts) {
@@ -432,6 +481,10 @@
     el.viewport.addEventListener('pointermove', onDragMove);
     el.viewport.addEventListener('pointerup', onDragEnd);
     el.viewport.addEventListener('pointercancel', onDragEnd);
+    el.seekbar.addEventListener('pointerdown', onSeekStart);
+    el.seekbar.addEventListener('pointermove', onSeekMove);
+    el.seekbar.addEventListener('pointerup', onSeekEnd);
+    el.seekbar.addEventListener('pointercancel', onSeekEnd);
     // No modo imersivo (controles escondidos) tocar na tela pausa/retoma — vale no celular.
     el.viewport.addEventListener('click', onViewportClick);
     document.addEventListener('fullscreenchange', onFullscreenChange);
